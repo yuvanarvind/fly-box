@@ -90,9 +90,17 @@ export default function View() {
       }
 
       // Get download URL
-      const { data: urlData } = await supabase.storage
+      const { data: urlData, error: urlError } = await supabase.storage
         .from("ephemeral")
         .createSignedUrl(linkData.object_path, 60);
+
+      console.log("Creating signed URL for:", linkData.object_path);
+      console.log("URL Data:", urlData);
+      console.log("URL Error:", urlError);
+
+      if (urlError) {
+        throw new Error(`Failed to create download URL: ${urlError.message}`);
+      }
 
       if (urlData?.signedUrl) {
         // Create temporary download link
