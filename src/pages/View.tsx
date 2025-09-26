@@ -149,11 +149,6 @@ export default function View() {
         if (updateError) {
           console.error("Failed to update view status:", updateError);
         }
-
-        // Delete file from storage immediately for one-time downloads
-        await supabase.storage
-          .from("ephemeral")
-          .remove([linkData.object_path]);
       }
 
       // Create temporary download link
@@ -164,28 +159,31 @@ export default function View() {
       link.click();
       document.body.removeChild(link);
 
-        toast({
-          title: "Download started",
-          description: "Your file download has begun",
-        });
+      toast({
+        title: "Download started",
+        description: "Your file download has begun",
+      });
 
-        // If first view, redirect to expired page after a delay
-        if (linkData.first_view) {
-          setTimeout(() => {
-            setIsExpired(true);
-          }, 1000);
-        }
-      } catch (error) {
-        console.error("Download failed:", error);
-        toast({
-          title: "Download failed",
-          description: error instanceof Error ? error.message : "An error occurred",
-          variant: "destructive",
-        });
-      } finally {
-        setIsDownloading(false);
+      // For first view files, delete from storage after a delay to allow download to complete
+      if (linkData.first_view) {
+        setTimeout(async () => {
+          await supabase.storage
+            .from("ephemeral")
+            .remove([linkData.object_path]);
+          setIsExpired(true);
+        }, 5000); // 5 second delay to allow download to complete
       }
-    };
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast({
+        title: "Download failed",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
