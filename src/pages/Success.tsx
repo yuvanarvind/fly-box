@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Header } from "@/components/layout/header";
+import { SimpleHeader } from "@/components/layout/simple-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -92,7 +92,7 @@ export default function Success() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <SimpleHeader />
         <main className="container max-w-2xl py-12">
           <div className="text-center">
             <p>Loading...</p>
@@ -105,7 +105,7 @@ export default function Success() {
   if (!linkData) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <SimpleHeader />
         <main className="container max-w-2xl py-12">
           <div className="text-center space-y-4">
             <h1 className="text-2xl font-bold">Link not found</h1>
@@ -121,7 +121,7 @@ export default function Success() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <SimpleHeader />
       <main className="container max-w-2xl py-12">
         <div className="space-y-8">
           <div className="text-center space-y-4">

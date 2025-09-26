@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Header } from "@/components/layout/header";
+import { SimpleHeader } from "@/components/layout/simple-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, Upload } from "lucide-react";
@@ -7,7 +7,7 @@ import { AlertTriangle, Upload } from "lucide-react";
 export default function Expired() {
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <SimpleHeader />
       <main className="container max-w-2xl py-12">
         <div className="space-y-8">
           <div className="text-center space-y-4">

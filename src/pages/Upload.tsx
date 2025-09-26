@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Header } from "@/components/layout/header";
+import { SimpleHeader } from "@/components/layout/simple-header";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,7 +117,7 @@ export default function Upload() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <SimpleHeader />
       <main className="container max-w-2xl py-12">
         <div className="space-y-8">
           <div className="text-center space-y-4">

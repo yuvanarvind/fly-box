@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
-import { Header } from "@/components/layout/header";
+import { SimpleHeader } from "@/components/layout/simple-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -209,7 +209,7 @@ export default function View() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <SimpleHeader />
         <main className="container max-w-2xl py-12">
           <div className="text-center">
             <p>Loading...</p>
@@ -227,7 +227,7 @@ export default function View() {
   if (isPasswordRequired) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <SimpleHeader />
         <main className="container max-w-md py-12">
           <div className="space-y-8">
             <div className="text-center space-y-4">
@@ -282,7 +282,7 @@ export default function View() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <SimpleHeader />
       <main className="container max-w-2xl py-12">
         <div className="space-y-8">
           <div className="text-center space-y-4">
