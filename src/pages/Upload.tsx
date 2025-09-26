@@ -1,0 +1,154 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Header } from "@/components/layout/header";
+import { FileUpload } from "@/components/ui/file-upload";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from "uuid";
+import { useToast } from "@/hooks/use-toast";
+import { Clock, Eye } from "lucide-react";
+
+export default function Upload() {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [firstView, setFirstView] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
+  };
+
+  const handleClearFile = () => {
+    setSelectedFile(null);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+
+    setIsUploading(true);
+
+    try {
+      // Generate unique paths and tokens
+      const fileId = uuidv4();
+      const objectPath = `${fileId}/${selectedFile.name}`;
+      
+      // Upload file to storage
+      const { error: uploadError } = await supabase.storage
+        .from("ephemeral")
+        .upload(objectPath, selectedFile);
+
+      if (uploadError) throw uploadError;
+
+      // Insert metadata into database
+      const { data, error: dbError } = await supabase
+        .from("links")
+        .insert({
+          object_path: objectPath,
+          filename: selectedFile.name,
+          size_bytes: selectedFile.size,
+          mime_type: selectedFile.type,
+          first_view: firstView,
+        })
+        .select("access_token")
+        .single();
+
+      if (dbError) throw dbError;
+
+      // Navigate to success page
+      navigate(`/success/${data.access_token}`);
+      
+      toast({
+        title: "File uploaded successfully!",
+        description: "Your share link has been generated.",
+      });
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container max-w-2xl py-12">
+        <div className="space-y-8">
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl font-bold tracking-tight">
+              Share a file that self-destructs
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Upload any file and get a secure link that expires automatically
+            </p>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Upload File</CardTitle>
+              <CardDescription>
+                Select a file to create a temporary sharing link
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <FileUpload
+                onFileSelect={handleFileSelect}
+                value={selectedFile}
+                onClear={handleClearFile}
+                disabled={isUploading}
+              />
+
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="first-view"
+                    checked={firstView}
+                    onCheckedChange={(checked) => setFirstView(checked as boolean)}
+                    disabled={isUploading}
+                  />
+                  <label
+                    htmlFor="first-view"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Delete after first view
+                  </label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  If checked, the file will be deleted immediately after the first download. 
+                  Otherwise, all links expire after 24 hours by default.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center space-x-2 text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>24 hour expiry</span>
+                </div>
+                <div className="flex items-center space-x-2 text-muted-foreground">
+                  <Eye className="h-4 w-4" />
+                  <span>Optional first-view deletion</span>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleUpload}
+                disabled={!selectedFile || isUploading}
+                className="w-full"
+                size="lg"
+              >
+                {isUploading ? "Uploading..." : "Upload & generate link"}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  );
+}
