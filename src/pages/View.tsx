@@ -119,41 +119,14 @@ export default function View() {
     setIsDownloading(true);
 
     try {
-      // Get download URL first (before marking as viewed for one-time files)
-      const { data: urlData, error: urlError } = await supabase.storage
-        .from("ephemeral")
-        .createSignedUrl(linkData.object_path, 60);
+      // Use the proxy endpoint instead of direct Supabase URL
+      const proxyUrl = `${window.location.origin}/api/download?token=${token}`;
+      
+      console.log("Using proxy URL:", proxyUrl);
 
-      console.log("Creating signed URL for:", linkData.object_path);
-      console.log("URL Data:", urlData);
-      console.log("URL Error:", urlError);
-
-      if (urlError) {
-        throw new Error(`Failed to create download URL: ${urlError.message}`);
-      }
-
-      if (!urlData?.signedUrl) {
-        throw new Error("Failed to generate download URL");
-      }
-
-      // If first view, mark as viewed and expire immediately
-      if (linkData.first_view) {
-        const { error: updateError } = await supabase
-          .from("links")
-          .update({
-            viewed_at: new Date().toISOString(),
-            expires_at: new Date().toISOString(), // Expire immediately
-          })
-          .eq("id", linkData.id);
-
-        if (updateError) {
-          console.error("Failed to update view status:", updateError);
-        }
-      }
-
-      // Create temporary download link
+      // Create temporary download link using the proxy
       const link = document.createElement("a");
-      link.href = urlData.signedUrl;
+      link.href = proxyUrl;
       link.download = linkData.filename;
       document.body.appendChild(link);
       link.click();
@@ -164,14 +137,11 @@ export default function View() {
         description: "Your file download has begun",
       });
 
-      // For first view files, delete from storage after a delay to allow download to complete
+      // For first view files, the server will handle expiration
       if (linkData.first_view) {
-        setTimeout(async () => {
-          await supabase.storage
-            .from("ephemeral")
-            .remove([linkData.object_path]);
+        setTimeout(() => {
           setIsExpired(true);
-        }, 5000); // 5 second delay to allow download to complete
+        }, 2000); // Show expiration message after a short delay
       }
     } catch (error) {
       console.error("Download failed:", error);
