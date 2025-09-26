@@ -119,22 +119,7 @@ export default function View() {
     setIsDownloading(true);
 
     try {
-      // If first view, mark as viewed immediately
-      if (linkData.first_view) {
-        const { error: updateError } = await supabase
-          .from("links")
-          .update({
-            viewed_at: new Date().toISOString(),
-            expires_at: new Date().toISOString(), // Expire immediately
-          })
-          .eq("id", linkData.id);
-
-        if (updateError) {
-          console.error("Failed to update view status:", updateError);
-        }
-      }
-
-      // Get download URL
+      // Get download URL first (before marking as viewed for one-time files)
       const { data: urlData, error: urlError } = await supabase.storage
         .from("ephemeral")
         .createSignedUrl(linkData.object_path, 60);
@@ -147,21 +132,37 @@ export default function View() {
         throw new Error(`Failed to create download URL: ${urlError.message}`);
       }
 
-      if (urlData?.signedUrl) {
-        // Create temporary download link
-        const link = document.createElement("a");
-        link.href = urlData.signedUrl;
-        link.download = linkData.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      if (!urlData?.signedUrl) {
+        throw new Error("Failed to generate download URL");
+      }
 
-        // Delete file from storage if first view
-        if (linkData.first_view) {
-          await supabase.storage
-            .from("ephemeral")
-            .remove([linkData.object_path]);
+      // If first view, mark as viewed and expire immediately
+      if (linkData.first_view) {
+        const { error: updateError } = await supabase
+          .from("links")
+          .update({
+            viewed_at: new Date().toISOString(),
+            expires_at: new Date().toISOString(), // Expire immediately
+          })
+          .eq("id", linkData.id);
+
+        if (updateError) {
+          console.error("Failed to update view status:", updateError);
         }
+
+        // Delete file from storage immediately for one-time downloads
+        await supabase.storage
+          .from("ephemeral")
+          .remove([linkData.object_path]);
+      }
+
+      // Create temporary download link
+      const link = document.createElement("a");
+      link.href = urlData.signedUrl;
+      link.download = linkData.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
         toast({
           title: "Download started",
@@ -174,20 +175,17 @@ export default function View() {
             setIsExpired(true);
           }, 1000);
         }
-      } else {
-        throw new Error("Failed to generate download URL");
+      } catch (error) {
+        console.error("Download failed:", error);
+        toast({
+          title: "Download failed",
+          description: error instanceof Error ? error.message : "An error occurred",
+          variant: "destructive",
+        });
+      } finally {
+        setIsDownloading(false);
       }
-    } catch (error) {
-      console.error("Download failed:", error);
-      toast({
-        title: "Download failed",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDownloading(false);
-    }
-  };
+    };
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
