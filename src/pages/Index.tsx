@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, Shield, Clock, Eye, ArrowRight } from "lucide-react";
@@ -138,6 +139,7 @@ const Index = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };
