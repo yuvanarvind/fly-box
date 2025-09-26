@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,8 @@ export default function Upload() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [firstView, setFirstView] = useState(false);
   const [password, setPassword] = useState("");
+  const [expiryType, setExpiryType] = useState<"hours" | "days">("hours");
+  const [expiryValue, setExpiryValue] = useState(24);
   const [isUploading, setIsUploading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -35,6 +38,15 @@ export default function Upload() {
     setIsUploading(true);
 
     try {
+      // Calculate expiry date based on user selection
+      const expiryDate = new Date();
+      const maxHours = 7 * 24; // 7 days maximum
+      const totalHours = expiryType === "days" ? expiryValue * 24 : expiryValue;
+      
+      // Ensure we don't exceed 7 days
+      const finalHours = Math.min(totalHours, maxHours);
+      expiryDate.setHours(expiryDate.getHours() + finalHours);
+
       // Generate unique paths and tokens
       const fileId = uuidv4();
       const objectPath = `${fileId}/${selectedFile.name}`;
@@ -60,7 +72,7 @@ export default function Upload() {
         passwordHash = await bcrypt.hash(password.trim(), 10);
       }
 
-      // Insert metadata into database
+      // Insert metadata into database with custom expiry
       const { data, error: dbError } = await supabase
         .from("links")
         .insert({
@@ -70,6 +82,7 @@ export default function Upload() {
           mime_type: selectedFile.type,
           first_view: firstView,
           password_hash: passwordHash,
+          expires_at: expiryDate.toISOString(),
         })
         .select("access_token")
         .single();
@@ -147,6 +160,47 @@ export default function Upload() {
                   </p>
                 </div>
 
+                <div className="space-y-3">
+                  <Label>Expiry Time</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      min="1"
+                      max={expiryType === "days" ? "7" : "168"}
+                      value={expiryValue}
+                      onChange={(e) => setExpiryValue(Math.max(1, parseInt(e.target.value) || 1))}
+                      disabled={isUploading}
+                      className="flex-1"
+                    />
+                    <Select
+                      value={expiryType}
+                      onValueChange={(value: "hours" | "days") => {
+                        setExpiryType(value);
+                        // Adjust value if switching to days and current value is too high
+                        if (value === "days" && expiryValue > 7) {
+                          setExpiryValue(7);
+                        }
+                        // Adjust value if switching to hours and current value would exceed 7 days
+                        if (value === "hours" && expiryValue > 168) {
+                          setExpiryValue(168);
+                        }
+                      }}
+                      disabled={isUploading}
+                    >
+                      <SelectTrigger className="w-24">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hours">Hours</SelectItem>
+                        <SelectItem value="days">Days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Maximum expiry time is 7 days (168 hours)
+                  </p>
+                </div>
+
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="first-view"
@@ -162,15 +216,14 @@ export default function Upload() {
                   </label>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  If checked, the file will be deleted immediately after the first download. 
-                  Otherwise, all links expire after 24 hours by default.
+                  If checked, the file will be deleted immediately after the first download.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                 <div className="flex items-center space-x-2 text-muted-foreground">
                   <Clock className="h-4 w-4" />
-                  <span>24 hour expiry</span>
+                  <span>Custom expiry (up to 7 days)</span>
                 </div>
                 <div className="flex items-center space-x-2 text-muted-foreground">
                   <Eye className="h-4 w-4" />
