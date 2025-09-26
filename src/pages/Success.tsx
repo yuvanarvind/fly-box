@@ -22,7 +22,7 @@ export default function Success() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const shareUrl = token ? `https://snap-drop.lovable.app/${token}` : "";
+  const shareUrl = token ? `https://snap-drop.lovable.app/f/${token}` : "";
 
   useEffect(() => {
     const fetchLinkData = async () => {

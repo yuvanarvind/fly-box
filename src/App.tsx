@@ -22,8 +22,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/success/:token" element={<Success />} />
-          <Route path="/:accessCode" element={<View />} />
           <Route path="/expired" element={<Expired />} />
+          <Route path="/f/:accessCode" element={<View />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
