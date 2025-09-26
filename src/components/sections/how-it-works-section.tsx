@@ -2,7 +2,7 @@ import { Upload, Share, Clock, Trash2, ArrowDown } from "lucide-react";
 
 export const HowItWorksSection = () => {
   return (
-    <section className="py-24 bg-gradient-to-b from-accent/5 to-background">
+    <section id="how-it-works" className="py-24 bg-gradient-to-b from-accent/5 to-background">
       <div className="container max-w-6xl">
         <div className="text-center space-y-6 mb-16">
           <h2 className="text-4xl md:text-5xl font-bold">

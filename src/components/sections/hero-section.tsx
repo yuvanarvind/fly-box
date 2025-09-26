@@ -31,9 +31,11 @@ export const HeroSection = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6 border-2 hover:bg-accent/50">
-              <Zap className="mr-2 h-4 w-4" />
-              See How It Works
+            <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6 border-2 hover:bg-accent/50">
+              <Link to="/upload">
+                <Zap className="mr-2 h-4 w-4" />
+                See How It Works
+              </Link>
             </Button>
           </div>
 

@@ -3,7 +3,7 @@ import { Shield, Lock, Eye, Trash2, Server, Key } from "lucide-react";
 
 export const SecuritySection = () => {
   return (
-    <section className="py-24 bg-gradient-to-b from-background to-accent/5">
+    <section id="security" className="py-24 bg-gradient-to-b from-background to-accent/5">
       <div className="container max-w-6xl">
         <div className="text-center space-y-6 mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-success/10 rounded-full text-sm font-medium text-success">

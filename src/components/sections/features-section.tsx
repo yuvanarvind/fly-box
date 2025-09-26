@@ -3,7 +3,7 @@ import { Shield, Clock, Eye, Upload, Download, Trash2 } from "lucide-react";
 
 export const FeaturesSection = () => {
   return (
-    <section className="py-24">
+    <section id="features" className="py-24">
       <div className="container max-w-6xl">
         <div className="text-center space-y-6 mb-16">
           <h2 className="text-4xl md:text-5xl font-bold">
