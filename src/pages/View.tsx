@@ -18,7 +18,8 @@ interface LinkData {
 }
 
 export default function View() {
-  const { token } = useParams<{ token: string }>();
+  const { accessCode } = useParams<{ accessCode: string }>();
+  const token = accessCode; // Use accessCode as token
   const [linkData, setLinkData] = useState<LinkData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
