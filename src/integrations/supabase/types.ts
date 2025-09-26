@@ -24,6 +24,7 @@ export type Database = {
           id: string
           mime_type: string | null
           object_path: string
+          password_hash: string | null
           size_bytes: number
           viewed_at: string | null
         }
@@ -36,6 +37,7 @@ export type Database = {
           id?: string
           mime_type?: string | null
           object_path: string
+          password_hash?: string | null
           size_bytes: number
           viewed_at?: string | null
         }
@@ -48,6 +50,7 @@ export type Database = {
           id?: string
           mime_type?: string | null
           object_path?: string
+          password_hash?: string | null
           size_bytes?: number
           viewed_at?: string | null
         }

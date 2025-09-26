@@ -3,9 +3,12 @@ import { useParams, Navigate } from "react-router-dom";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Download, FileText, Clock, Eye } from "lucide-react";
+import { Download, FileText, Clock, Eye, Lock } from "lucide-react";
+import bcrypt from "bcryptjs";
 
 interface LinkData {
   id: string;
@@ -15,6 +18,7 @@ interface LinkData {
   first_view: boolean;
   viewed_at: string | null;
   expires_at: string;
+  password_hash: string | null;
 }
 
 export default function View() {
@@ -24,6 +28,9 @@ export default function View() {
   const [loading, setLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
+  const [password, setPassword] = useState("");
+  const [isPasswordRequired, setIsPasswordRequired] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -58,6 +65,11 @@ export default function View() {
         }
 
         setLinkData(data);
+        
+        // Check if password is required
+        if (data.password_hash) {
+          setIsPasswordRequired(true);
+        }
       } catch (error) {
         console.error("Failed to fetch link data:", error);
         setIsExpired(true);
@@ -68,6 +80,38 @@ export default function View() {
 
     fetchLinkData();
   }, [token]);
+
+  const verifyPassword = async () => {
+    if (!linkData || !password.trim()) return;
+
+    setIsVerifying(true);
+
+    try {
+      const isValid = await bcrypt.compare(password.trim(), linkData.password_hash!);
+      
+      if (isValid) {
+        setIsPasswordRequired(false);
+        toast({
+          title: "Access granted",
+          description: "Password verified successfully",
+        });
+      } else {
+        toast({
+          title: "Incorrect password",
+          description: "Please try again",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Verification failed",
+        description: "An error occurred while verifying the password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const handleDownload = async () => {
     if (!linkData) return;
@@ -183,6 +227,63 @@ export default function View() {
     return <Navigate to="/expired" replace />;
   }
 
+  // Show password prompt if required
+  if (isPasswordRequired) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container max-w-md py-12">
+          <div className="space-y-8">
+            <div className="text-center space-y-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-warning/10 mb-4">
+                <Lock className="h-8 w-8 text-warning" />
+              </div>
+              <h1 className="text-3xl font-bold">Password Required</h1>
+              <p className="text-muted-foreground">
+                This file is password protected
+              </p>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Enter Password</CardTitle>
+                <CardDescription>
+                  Please enter the password to access this file
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isVerifying}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && password.trim()) {
+                        verifyPassword();
+                      }
+                    }}
+                  />
+                </div>
+                
+                <Button
+                  onClick={verifyPassword}
+                  disabled={!password.trim() || isVerifying}
+                  className="w-full"
+                >
+                  {isVerifying ? "Verifying..." : "Access File"}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -206,24 +307,35 @@ export default function View() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  {linkData.first_view ? (
-                    <>
-                      <Eye className="h-4 w-4 text-warning" />
-                      <span className="text-sm font-medium text-warning">
-                        This file will be deleted after download
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        Expires in {formatExpiryTime(linkData.expires_at)}
-                      </span>
-                    </>
-                  )}
+              <div className="space-y-3">
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    {linkData.first_view ? (
+                      <>
+                        <Eye className="h-4 w-4 text-warning" />
+                        <span className="text-sm font-medium text-warning">
+                          This file will be deleted after download
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">
+                          Expires in {formatExpiryTime(linkData.expires_at)}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
+
+                {linkData.password_hash && (
+                  <div className="p-3 bg-success/10 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <Lock className="h-4 w-4 text-success" />
+                      <span className="text-sm text-success">Password verified</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <Button

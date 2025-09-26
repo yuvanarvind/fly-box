@@ -5,14 +5,18 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, Eye } from "lucide-react";
+import { Clock, Eye, Lock } from "lucide-react";
+import bcrypt from "bcryptjs";
 
 export default function Upload() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [firstView, setFirstView] = useState(false);
+  const [password, setPassword] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -50,6 +54,12 @@ export default function Upload() {
         throw new Error(`Upload failed: ${uploadError.message}`);
       }
 
+      // Hash password if provided
+      let passwordHash = null;
+      if (password.trim()) {
+        passwordHash = await bcrypt.hash(password.trim(), 10);
+      }
+
       // Insert metadata into database
       const { data, error: dbError } = await supabase
         .from("links")
@@ -59,6 +69,7 @@ export default function Upload() {
           size_bytes: selectedFile.size,
           mime_type: selectedFile.type,
           first_view: firstView,
+          password_hash: passwordHash,
         })
         .select("access_token")
         .single();
@@ -121,6 +132,21 @@ export default function Upload() {
               />
 
               <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password (Optional)</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter password to protect this file"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isUploading}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty for no password protection
+                  </p>
+                </div>
+
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="first-view"
@@ -141,7 +167,7 @@ export default function Upload() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                 <div className="flex items-center space-x-2 text-muted-foreground">
                   <Clock className="h-4 w-4" />
                   <span>24 hour expiry</span>
@@ -149,6 +175,10 @@ export default function Upload() {
                 <div className="flex items-center space-x-2 text-muted-foreground">
                   <Eye className="h-4 w-4" />
                   <span>Optional first-view deletion</span>
+                </div>
+                <div className="flex items-center space-x-2 text-muted-foreground">
+                  <Lock className="h-4 w-4" />
+                  <span>Optional password protection</span>
                 </div>
               </div>
 
