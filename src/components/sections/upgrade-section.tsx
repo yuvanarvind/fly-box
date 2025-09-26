@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Crown, Zap, Star, Check, Mail } from "lucide-react";
 
 export const UpgradeSection = () => {
@@ -18,15 +19,38 @@ export const UpgradeSection = () => {
 
     setIsSubmitting(true);
     
-    // Simulate submission - in real app, this would save to database
-    setTimeout(() => {
+    try {
+      const { error } = await supabase
+        .from('waitlist')
+        .insert({ email: email.trim() });
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast({
+            title: "Already registered!",
+            description: "This email is already on our waitlist.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Welcome to the waitlist!",
+          description: "Thanks for your interest. We'll reach out soon with early access.",
+        });
+        setEmail("");
+      }
+    } catch (error) {
+      console.error('Error adding email to waitlist:', error);
       toast({
-        title: "Interest registered!",
-        description: "Thanks for your interest. We'll reach out soon with early access.",
+        title: "Something went wrong",
+        description: "Please try again later.",
+        variant: "destructive",
       });
-      setEmail("");
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (
