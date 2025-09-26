@@ -23,7 +23,7 @@ export const HeroSection = () => {
             </p>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full max-w-md sm:max-w-none">
+          <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full max-w-md sm:max-w-none justify-center items-center">
             <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-6 bg-gradient-to-r from-primary to-primary-hover hover:shadow-lg transform hover:scale-105 transition-all duration-200 w-full sm:w-auto">
               <Link to="/upload">
                 <Upload className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
