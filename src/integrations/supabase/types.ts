@@ -14,7 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      links: {
+        Row: {
+          access_token: string
+          created_at: string
+          expires_at: string
+          filename: string
+          first_view: boolean
+          id: string
+          mime_type: string | null
+          object_path: string
+          size_bytes: number
+          viewed_at: string | null
+        }
+        Insert: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string
+          filename: string
+          first_view?: boolean
+          id?: string
+          mime_type?: string | null
+          object_path: string
+          size_bytes: number
+          viewed_at?: string | null
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string
+          filename?: string
+          first_view?: boolean
+          id?: string
+          mime_type?: string | null
+          object_path?: string
+          size_bytes?: number
+          viewed_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
