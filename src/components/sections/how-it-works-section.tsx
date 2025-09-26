@@ -2,18 +2,18 @@ import { Upload, Share, Clock, Trash2, ArrowDown } from "lucide-react";
 
 export const HowItWorksSection = () => {
   return (
-    <section id="how-it-works" className="py-24 bg-gradient-to-b from-accent/5 to-background">
-      <div className="container max-w-6xl">
-        <div className="text-center space-y-6 mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold">
+    <section id="how-it-works" className="py-16 md:py-20 lg:py-24 bg-gradient-to-b from-accent/5 to-background">
+      <div className="container max-w-6xl px-4 md:px-6">
+        <div className="text-center space-y-4 md:space-y-6 mb-12 md:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
             How It Works
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
             Secure file sharing made simple. Just three steps to completely private, temporary file sharing.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 lg:gap-8 relative">
           {/* Step 1 */}
           <div className="text-center space-y-6 group">
             <div className="relative">
@@ -99,9 +99,9 @@ export const HowItWorksSection = () => {
           </div>
         </div>
 
-        <div className="text-center mt-16">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-success/10 rounded-full text-success font-medium">
-            <Clock className="h-5 w-5" />
+        <div className="text-center mt-12 md:mt-16">
+          <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-3 bg-success/10 rounded-full text-success font-medium text-sm sm:text-base">
+            <Clock className="h-4 sm:h-5 w-4 sm:w-5" />
             Average process time: Under 30 seconds
           </div>
         </div>

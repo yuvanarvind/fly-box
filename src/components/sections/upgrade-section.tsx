@@ -30,25 +30,25 @@ export const UpgradeSection = () => {
   };
 
   return (
-    <section className="py-24 bg-gradient-to-br from-primary/5 via-background to-warning/5">
-      <div className="container max-w-6xl">
-        <div className="text-center space-y-6 mb-16">
+    <section className="py-16 md:py-20 lg:py-24 bg-gradient-to-br from-primary/5 via-background to-warning/5">
+      <div className="container max-w-6xl px-4 md:px-6">
+        <div className="text-center space-y-4 md:space-y-6 mb-12 md:mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-warning/10 rounded-full text-sm font-medium text-warning">
             <Crown className="h-4 w-4" />
             Coming Soon
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
             Ready for{" "}
             <span className="bg-gradient-to-r from-primary to-warning bg-clip-text text-transparent">
               Premium Features?
             </span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
             Join our waitlist for FlyBox Pro and get early access to advanced security features, larger file limits, and priority support.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div className="space-y-8">
             <div className="space-y-6">
               <h3 className="text-2xl font-semibold flex items-center gap-2">
