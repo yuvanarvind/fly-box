@@ -35,12 +35,20 @@ export default function Upload() {
       const fileId = uuidv4();
       const objectPath = `${fileId}/${selectedFile.name}`;
       
+      console.log("Uploading file:", selectedFile.name, "Size:", selectedFile.size);
+      console.log("Object path:", objectPath);
+      
       // Upload file to storage
-      const { error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from("ephemeral")
         .upload(objectPath, selectedFile);
 
-      if (uploadError) throw uploadError;
+      console.log("Upload result:", uploadData);
+      console.log("Upload error:", uploadError);
+
+      if (uploadError) {
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
 
       // Insert metadata into database
       const { data, error: dbError } = await supabase
@@ -55,7 +63,14 @@ export default function Upload() {
         .select("access_token")
         .single();
 
-      if (dbError) throw dbError;
+      console.log("Database insert result:", data);
+      console.log("Database insert error:", dbError);
+
+      if (dbError) {
+        // Clean up uploaded file if link creation fails
+        await supabase.storage.from("ephemeral").remove([objectPath]);
+        throw new Error(`Failed to create link: ${dbError.message}`);
+      }
 
       // Navigate to success page
       navigate(`/success/${data.access_token}`);
